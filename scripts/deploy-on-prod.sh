@@ -23,6 +23,7 @@ set -e
 BUNDLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR="${SOURCE_DIR:-/srv/staging}"
 TARGET_DIR="${TARGET_DIR:-/opt/it-asset}"
+BASE_URL="${BASE_URL:-http://localhost}"   # nginx 진입 주소
 
 echo "============================================================"
 echo " 운영 배포"
@@ -89,7 +90,7 @@ sleep 10
 docker compose ps --format "      {{.Name}}  {{.Status}}" 2>/dev/null || docker compose ps
 
 echo ""
-HTTP=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/api/employees 2>/dev/null || echo "000")
+HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/employees" 2>/dev/null || echo "000")
 if [ "$HTTP" = "200" ]; then
   echo "      API 정상 응답 (HTTP 200)"
 else

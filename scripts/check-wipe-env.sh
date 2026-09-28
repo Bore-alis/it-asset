@@ -7,11 +7,11 @@
 #
 # 사용법:
 #   ./check-wipe-env.sh                               # 기본값(개발서버)으로 점검
-#   BASE_URL=http://10.x.x.x:8001 ./check-wipe-env.sh # 다른 서버 점검
+#   BASE_URL=http://<서버주소> ./check-wipe-env.sh    # 다른 서버 점검
 #   CONTAINER=운영백엔드컨테이너명 ./check-wipe-env.sh
 # =============================================================================
 
-BASE_URL="${BASE_URL:-http://localhost:8001}"
+BASE_URL="${BASE_URL:-http://localhost}"
 CONTAINER="${CONTAINER:-it-asset-backend-1}"
 UPLOAD_PATH="${UPLOAD_PATH:-/app/uploads}"
 

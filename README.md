@@ -29,11 +29,11 @@
   │ HTTPS
 로드밸런서 ─── TLS 종료, 출처 제어
   │ HTTP
-nginx :8001 ─┬─ /api/*  → Spring Boot :8080 ─┬─ PostgreSQL
-             │                               ├─ Active Directory (LDAP)
-             │                               ├─ SMTP
-             │                               └─ Synology NAS Web API
-             └─ /*      → Next.js    :3000
+nginx ─┬─ /api/*  → Spring Boot ─┬─ PostgreSQL
+       │                        ├─ Active Directory (LDAP)
+       │                        ├─ SMTP
+       │                        └─ Synology NAS Web API
+       └─ /*      → Next.js
 ```
 
 | 구분 | 기술 |
@@ -87,7 +87,7 @@ cd backend && ./gradlew build -x test && cd ..
 cd deploy
 cp .env.example .env    # 접속 정보 입력
 docker compose up -d --build
-# http://localhost:8001
+# http://localhost  (포트는 .env 의 HTTP_PORT 로 변경)
 ```
 
 - 모든 접속 정보는 환경변수로 주입합니다. 설정 항목은 [.env.example](deploy/.env.example)을 참고하세요.
