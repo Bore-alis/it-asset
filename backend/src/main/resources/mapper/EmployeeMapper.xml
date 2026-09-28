@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.backend.mapper.EmployeeMapper">
+
+    <select id="selectAllEmployees" resultType="com.example.backend.dto.EmployeeDTO">
+        SELECT * FROM employees
+    </select>
+
+    <select id="selectEmployeeById" resultType="com.example.backend.dto.EmployeeDTO">
+        SELECT * FROM employees WHERE employee_id = #{id}
+    </select>
+
+    <select id="selectOrgChart" resultType="com.example.backend.dto.OrgChartDTO">
+        SELECT id, department1, department2, department3, sort_order AS sortOrder 
+        FROM org_chart 
+        ORDER BY sort_order ASC
+    </select>
+
+    <delete id="deleteAllOrgChart">
+        DELETE FROM org_chart
+    </delete>
+
+    <insert id="insertOrgChart">
+        INSERT INTO org_chart (department1, department2, department3, sort_order)
+        VALUES (#{department1}, #{department2}, #{department3}, #{sortOrder})
+    </insert>
+
+    <insert id="insertEmployee">
+        INSERT INTO employees (employee_id, name, department1, department2, department3, rank, email, status)
+        VALUES (#{employeeId}, #{name}, #{department1}, #{department2}, #{department3}, #{rank}, #{email}, '재직')
+    </insert>
+
+    <update id="updateEmployee">
+        UPDATE employees
+        SET name = #{name}, email = #{email},
+            department1 = #{department1}, department2 = #{department2}, department3 = #{department3},
+            rank = #{rank}
+        WHERE employee_id = #{employeeId}
+    </update>
+
+    <update id="updateEmployeeStatus">
+        UPDATE employees SET status = #{status} WHERE employee_id = #{id}
+    </update>
+
+    <update id="retireEmployee">
+        UPDATE employees SET status = '퇴사' WHERE employee_id = #{id}
+    </update>
+
+    <delete id="deleteEmployee">
+        DELETE FROM employees WHERE employee_id = #{id}
+    </delete>
+
+    <delete id="deleteEmployeeHistory">
+        DELETE FROM employee_history WHERE employee_id = #{id}
+    </delete>
+
+    <delete id="deleteAllEmployees">
+        DELETE FROM employees
+    </delete>
+
+    <delete id="deleteAllEmployeeHistory">
+        DELETE FROM employee_history
+    </delete>
+
+    <insert id="insertEmployeeHistory">
+        INSERT INTO employee_history (employee_id, action_type, change_date)
+        VALUES (#{employeeId}, #{actionType}, NOW())
+    </insert>
+
+    <select id="selectEmployeeHistory" resultType="com.example.backend.dto.EmployeeHistoryDTO">
+        SELECT * FROM employee_history WHERE employee_id = #{id} ORDER BY change_date DESC
+    </select>
+
+    <select id="selectAllAssets" resultType="com.example.backend.dto.AssetDTO">
+        SELECT * FROM assets ORDER BY accounting_ledger, accounting_ledger_index, asset_id
+    </select>
+
+    <select id="selectAvailableAssets" resultType="com.example.backend.dto.AssetDTO">
+        SELECT * FROM assets WHERE status = '재고' ORDER BY asset_id
+    </select>
+
+    <select id="selectAssetsByEmployeeId" resultType="com.example.backend.dto.AssetDTO">
+        SELECT * FROM assets WHERE current_user_id = #{employeeId} ORDER BY asset_id
+    </select>
+
+    <select id="selectAssignedAssets" resultType="com.example.backend.dto.AssetDTO">
+        SELECT * FROM assets WHERE current_user_id IS NOT NULL
+    </select>
+
+    <update id="returnAllAssets">
+        UPDATE assets SET current_user_id = NULL, status = '재고' WHERE current_user_id IS NOT NULL
+    </update>
+
+    <select id="selectAssetById" resultType="com.example.backend.dto.AssetDTO">
+        SELECT * FROM assets WHERE asset_id = #{assetId}
+    </select>
+
+    <insert id="insertAsset">
+        INSERT INTO assets (asset_id, category, model, serial_number, accounting_ledger, accounting_ledger_index, status, current_user_id, reason, purchase_date, residual_value)
+        VALUES (#{assetId}, #{category}, #{model}, #{serialNumber}, #{accountingLedger}, #{accountingLedgerIndex}, '재고', NULL, #{reason}, #{purchaseDate}, #{residualValue})
+    </insert>
+
+    <update id="updateAsset">
+        UPDATE assets
+        SET category = #{category},
+            model = #{model},
+            serial_number = #{serialNumber},
+            accounting_ledger = #{accountingLedger},
+            accounting_ledger_index = #{accountingLedgerIndex},
+            reason = #{reason},
+            purchase_date = #{purchaseDate},
+            residual_value = #{residualValue},
+            status = #{status}
+        WHERE asset_id = #{assetId}
+    </update>
+
+    <update id="updateAssetOwner">
+        UPDATE assets
+        SET current_user_id = #{employeeId}, status = '사용중'
+        WHERE asset_id = #{assetId}
+    </update>
+
+    <update id="returnAsset">
+        UPDATE assets
+        SET current_user_id = NULL, status = '재고'
+        WHERE asset_id = #{assetId}
+    </update>
+
+    <delete id="deleteAsset">
+        DELETE FROM assets WHERE asset_id = #{assetId}
+    </delete>
+
+    <insert id="insertAssetHistory">
+        INSERT INTO asset_history (asset_id, employee_id, prev_user_id, action_type, status, reason, change_date)
+        VALUES (#{assetId}, #{employeeId}, #{prevUserId}, #{actionType}, #{status}, #{reason}, NOW())
+    </insert>
+
+    <update id="clearEmployeeFromAssetHistory">
+        UPDATE asset_history 
+        SET employee_id = NULL, prev_user_id = NULL 
+        WHERE employee_id = #{id} OR prev_user_id = #{id}
+    </update>
+
+    <update id="clearAllEmployeeFromAssetHistory">
+        UPDATE asset_history SET employee_id = NULL, prev_user_id = NULL
+    </update>
+
+    <select id="selectAssetHistory" resultType="com.example.backend.dto.AssetHistoryDTO">
+        SELECT * FROM asset_history WHERE asset_id = #{assetId} ORDER BY change_date DESC
+    </select>
+
+    <select id="selectAllAssetHistories" resultType="com.example.backend.dto.AssetHistoryDTO">
+        SELECT * FROM asset_history ORDER BY change_date DESC
+    </select>
+
+    <select id="selectHistoryById" resultType="com.example.backend.dto.AssetHistoryDTO">
+        SELECT * FROM asset_history WHERE history_id = CAST(#{historyId} AS INTEGER)
+    </select>
+
+    <select id="selectRecentReplaceReturn" resultType="com.example.backend.dto.AssetHistoryDTO">
+        SELECT * FROM asset_history 
+        WHERE prev_user_id = #{employeeId} AND action_type = '교체(반납)' 
+        ORDER BY change_date DESC LIMIT 1
+    </select>
+
+    <select id="selectEmailByHistoryId" resultType="java.lang.String">
+        SELECT e.email 
+        FROM asset_history h
+        LEFT JOIN employees e ON (h.employee_id = e.employee_id OR h.prev_user_id = e.employee_id)
+        WHERE h.history_id = CAST(#{historyId} AS INTEGER) AND e.email IS NOT NULL
+        LIMIT 1
+    </select>
+
+</mapper>
